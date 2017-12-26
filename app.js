@@ -9,6 +9,7 @@ app.get('/', function(req,res){
 });
 
 var clients = 0;
+var roomno = 1;
 
 //A custom namespace
 var nsp = io.of('/my-namespace');
@@ -21,6 +22,13 @@ io.on('connection', function(socket){
   clients++;
   console.log('User connected');
 
+  //Increase roomno when 2 clients are present in a room.
+  if(io.nsps['/'].adapter.rooms["room-"+roomno] && io.nsps['/'].adapter.rooms["room-"+roomno].length > 1) roomno++;
+    socket.join("room-"+roomno);
+
+  //Send this event to everyone in the room
+  io.sockets.in("room-"+roomno).emit('connectToRoom', "You are in room no. "+roomno);
+  
   //Send message after a timeout of 4 seconds (4000 milliseconds)
   setTimeout(function(){
     //Send an object when emmiting an event. I think this is some JSON
